@@ -1,0 +1,16 @@
+﻿@model MvcPagingListDesign.Models.PageListViewModel
+
+<table>
+    @foreach (var stu in Model.Students)
+    {
+        <tr>
+            <td>@stu.Number</td>
+            <td>@stu.Name</td>
+        </tr>
+    }
+</table>
+
+<a asp-controller="Home" asp-action="TurnToPage" asp-route-pageIndex="1">首页</a>
+<a asp-controller="Home" asp-action="TurnToPage" asp-route-pageIndex="@(Model.PageIndex-1 < 1 ? 1 : Model.PageIndex-1)">上一页</a>
+<a asp-controller="Home" asp-action="TurnToPage" asp-route-pageIndex="@(Model.PageIndex+1 > Model.TotalPage ? Model.PageIndex : Model.PageIndex+1)">下一页</a>
+<a asp-controller="Home" asp-action="TurnToPage" asp-route-pageIndex="@(Model.TotalPage)">尾页</a>

@@ -9,14 +9,19 @@ namespace MvcPagingListDesign.PagingList
     /// <summary>
     /// 
     /// </summary>
-    public class MvcPagingList<TContext,TClass>:IDisposable 
-        where TContext : DbContext where TClass : class
+    public class MvcPagingList<TContext,TClass> where TContext : DbContext where TClass : class
     {
         private TContext _context;
-        public int Count => _context.Set<TClass>().Count();
-        public MvcPagingList(TContext context)
+        //public int PageIndex { get;private set; }
+        public int PageSize { get;private set; }
+        public int TotalCount { get;private set; }
+        public int TotalPage { get; private set; }
+        public MvcPagingList(TContext context,int pageSize)
         {
             _context = context;
+            TotalCount = _context.Set<TClass>().Count();
+            PageSize = pageSize;
+            TotalPage = (int)Math.Ceiling(TotalCount / (double)PageSize);
         }
 
         public IEnumerable<TClass> GetTable()
@@ -29,66 +34,24 @@ namespace MvcPagingListDesign.PagingList
             return _context.Set<TClass>().OrderBy<TClass, TKey>(expression).AsEnumerable();
         }
 
-        public IEnumerable<TClass> GetPageTable(int pageIndex,int pageSize)
+        public IEnumerable<TClass> GetPageTable(int pageIndex)
         {
-            return  _context.Set<TClass>().Skip((pageIndex - 1) * pageSize)
-                .Take(pageSize).AsEnumerable();
+            return  _context.Set<TClass>().Skip((pageIndex - 1) * PageSize)
+                .Take(PageSize).AsEnumerable();
         }
 
         public IEnumerable<TClass> GetPageTableByAsc<TKey>
-            (int pageIndex, int pageSize, Expression<Func<TClass, TKey>> expression)
+            (ref int pageIndex, Expression<Func<TClass, TKey>> expression)
         {
             return _context.Set<TClass>().OrderBy<TClass, TKey>(expression)
-                .Skip((pageIndex - 1) * pageSize).Take(pageSize).AsEnumerable();
+                .Skip((pageIndex - 1) * PageSize).Take(PageSize).AsEnumerable();
         }
 
         public IEnumerable<TClass> GetPageTableByDesc<TKey>
-            (int pageIndex, int pageSize, Expression<Func<TClass, TKey>> expression)
+            (int pageIndex, Expression<Func<TClass, TKey>> expression)
         {
             return _context.Set<TClass>().OrderByDescending<TClass, TKey>(expression)
-                .Skip((pageIndex - 1) * pageSize).Take(pageSize).AsEnumerable();
-        }
-
-        public IEnumerable<TClass> GetFirstPage(int pageSize)
-        {
-            return GetPageTable(1, pageSize);
-        }
-
-        public IEnumerable<TClass> GetFirstPageByAsc<TKey>
-            (int pageSize, Expression<Func<TClass, TKey>> expression)
-        {
-            return GetPageTableByAsc(1, pageSize, expression);
-        }
-
-        public IEnumerable<TClass> GetFirstPageByDesc<TKey>
-            (int pageSize, Expression<Func<TClass, TKey>> expression)
-        {
-            return GetPageTableByDesc(1, pageSize, expression);
-        }
-
-        public IEnumerable<TClass> GetLastPage(int pageSize)
-        {
-           int lastPageIndex = (int)Math.Ceiling(Count / (double)pageSize);
-            return GetPageTable(lastPageIndex, pageSize);
-        }
-
-        public IEnumerable<TClass> GetLastPageByAsc<TKey>
-            (int pageSize, Expression<Func<TClass, TKey>> expression)
-        {
-            int lastPageIndex = (int)Math.Ceiling(Count / (double)pageSize);
-            return GetPageTableByAsc(lastPageIndex, pageSize, expression);
-        }
-
-        public IEnumerable<TClass> GetLastPageByDesc<TKey>
-            (int pageSize, Expression<Func<TClass, TKey>> expression)
-        {
-            int lastPageIndex = (int)Math.Ceiling(Count / (double)pageSize);
-            return GetPageTableByDesc(lastPageIndex, pageSize, expression);
-        }
-
-        public void Dispose()
-        {
-            _context.Dispose();
+                .Skip((pageIndex - 1) * PageSize).Take(PageSize).AsEnumerable();
         }
     }
 }

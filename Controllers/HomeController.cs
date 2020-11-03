@@ -19,30 +19,46 @@ namespace MvcPagingListDesign.Controllers
         {
             _logger = logger;
             _context = context;
-            var stus = new List<Student>()
+            if (!context.Students.Any())
             {
-                new Student {Number="001",Name="张三"},
-                new Student {Number="002",Name="李四"},
-                new Student {Number="003",Name="王五"},
-                new Student {Number="004",Name="胡六"},
-                new Student {Number="005",Name="林七"},
-                new Student {Number="006",Name="潘八"}
-            };
-            _context.AddRange(stus);
-            _context.SaveChanges();
+                var stus = new List<Student>()
+                {
+                    new Student {Number="001",Name="张三"},
+                    new Student {Number="002",Name="李四"},
+                    new Student {Number="003",Name="王五"},
+                    new Student {Number="004",Name="胡六"},
+                    new Student {Number="005",Name="林七"},
+                    new Student {Number="006",Name="潘八"},
+                    new Student {Number="007",Name="张九"},
+                    new Student {Number="008",Name="李十"},
+                    new Student {Number="009",Name="王十一"},
+                    new Student {Number="010",Name="胡十二"}
+                };
+                _context.AddRange(stus);
+                _context.SaveChanges();
+            }
         }
 
         public IActionResult Index()
         {
-            using (var pagelist = new MvcPagingList<StuContext, Student>(_context))
-            {
-                var stus = pagelist.GetPageTableOrderByAsc(1, 4, stu => stu.Number);
-                foreach (var stu in stus)
-                {
-                    Console.WriteLine(stu.Name);
-                }
-            }
             return View();
+        }
+
+        public IActionResult TurnToPage(int pageIndex)
+        {
+            var pagelist = new MvcPagingList<StuContext, Student>(_context, 4);
+            var stus = pagelist.GetPageTableByAsc(ref pageIndex, stu => stu.Number);
+            var model = new PageListViewModel
+            {
+                Students = stus,
+                PageIndex = pageIndex,
+                TotalPage = pagelist.TotalPage
+            };
+            //foreach (var stu in stus)
+            //{
+            //    Console.WriteLine(stu.Name);
+            //}
+            return View(model);
         }
 
         public IActionResult Privacy()
