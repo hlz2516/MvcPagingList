@@ -46,18 +46,18 @@ namespace MvcPagingListDesign.Controllers
 
         public IActionResult TurnToPage(int pageIndex)
         {
-            var pagelist = new MvcPagingList<StuContext, Student>(_context, 4);
-            var stus = pagelist.GetPageTableByAsc(ref pageIndex, stu => stu.Number);
+            //初始化，由于是泛型类，所以传入你需要的领域类以及该领域类所在的context
+            var pagelist = new MvcPagingList<StuContext, Student>(_context, 4); //参数二表示每页多少个
+            //调用分页方法,参数一表示页索引即第几页，参数2表示你要根据领域类的哪个字段进行升序排序
+            var stus = pagelist.GetPageTableByAsc(pageIndex, stu => stu.Number);
+            //封装成ViewModel
             var model = new PageListViewModel
             {
                 Students = stus,
                 PageIndex = pageIndex,
                 TotalPage = pagelist.TotalPage
             };
-            //foreach (var stu in stus)
-            //{
-            //    Console.WriteLine(stu.Name);
-            //}
+            //将model返回给页面
             return View(model);
         }
 

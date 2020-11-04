@@ -6,9 +6,6 @@ using System.Linq.Expressions;
 
 namespace MvcPagingListDesign.PagingList
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public class MvcPagingList<TContext,TClass> where TContext : DbContext where TClass : class
     {
         private TContext _context;
@@ -23,30 +20,36 @@ namespace MvcPagingListDesign.PagingList
             PageSize = pageSize;
             TotalPage = (int)Math.Ceiling(TotalCount / (double)PageSize);
         }
-
-        public IEnumerable<TClass> GetTable()
-        {
-            return _context.Set<TClass>().AsEnumerable();
-        }
-
-        public IEnumerable<TClass> GetTableByAsc<TKey>(Expression<Func<TClass,TKey>> expression)
-        {
-            return _context.Set<TClass>().OrderBy<TClass, TKey>(expression).AsEnumerable();
-        }
-
+        /// <summary>
+        /// 不排序获取对应页索引的分页数据
+        /// </summary>
+        /// <param name="pageIndex"></param>
+        /// <returns></returns>
         public IEnumerable<TClass> GetPageTable(int pageIndex)
         {
             return  _context.Set<TClass>().Skip((pageIndex - 1) * PageSize)
                 .Take(PageSize).AsEnumerable();
         }
-
+        /// <summary>
+        /// 根据TKey字段进行升序，再获取对应页索引的分页数据
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <param name="pageIndex"></param>
+        /// <param name="expression"></param>
+        /// <returns></returns>
         public IEnumerable<TClass> GetPageTableByAsc<TKey>
-            (ref int pageIndex, Expression<Func<TClass, TKey>> expression)
+            (int pageIndex, Expression<Func<TClass, TKey>> expression)
         {
             return _context.Set<TClass>().OrderBy<TClass, TKey>(expression)
                 .Skip((pageIndex - 1) * PageSize).Take(PageSize).AsEnumerable();
         }
-
+        /// <summary>
+        /// 根据TKey字段进行降序，再获取对应页索引的分页数据
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <param name="pageIndex"></param>
+        /// <param name="expression"></param>
+        /// <returns></returns>
         public IEnumerable<TClass> GetPageTableByDesc<TKey>
             (int pageIndex, Expression<Func<TClass, TKey>> expression)
         {
